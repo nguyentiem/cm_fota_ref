@@ -1,0 +1,456 @@
+[
+  {
+    "id": "at_bare",
+    "pattern": "^AT$",
+    "final": "OK"
+  },
+  {
+    "id": "cgmi",
+    "pattern": "^AT\\+CGMI$",
+    "response": ["{state.vendor}"],
+    "final": "OK"
+  },
+    {
+    "id": "cgmm",
+    "pattern": "^AT\\+CGMM$",
+    "response": ["{state.model}"],
+    "final": "OK"
+  },
+{
+    "id": "cqmr",
+    "pattern": "^AT\\+QGMR$",
+    "response": ["{state.firmware}"],
+    "final": "OK"
+  },
+  {
+    "id": "at_cmee_set",
+    "pattern": "^AT\\+CMEE=(?P<mode>[012])$",
+    "final": "OK"
+  },
+  {
+    "id": "ate0",
+    "pattern": "^ATE0$",
+    "actions": [
+      { "op": "set_state", "path": "echo_mode", "value": "false", "cast": "bool" }
+    ],
+    "final": "OK"
+  },
+  {
+    "id": "ate1",
+    "pattern": "^ATE1$",
+    "actions": [
+      { "op": "set_state", "path": "echo_mode", "value": "true", "cast": "bool" }
+    ],
+    "final": "OK"
+  },
+  {
+    "id": "cfun_query",
+    "pattern": "^AT\\+CFUN\\?$",
+    "response": ["+CFUN: {state.cfun}"],
+    "final": "OK"
+  },
+  {
+    "id": "cfun_set",
+    "pattern": "^AT\\+CFUN=(?P<cfun>\\d)(?:,\\d)?$",
+    "actions": [
+      { "op": "set_state", "path": "cfun", "value": "{cfun}", "cast": "int" },
+      { "op": "auto_attach", "trigger_on_cfun": "{cfun}" }
+    ],
+    "final": "OK"
+  },
+  {
+    "id": "cereg_query",
+    "pattern": "^AT\\+CEREG\\?$",
+    "response": ["+CEREG: {state.cereg_mode},{state.cereg_stat}"],
+    "final": "OK"
+  },
+  {
+    "id": "cereg_set",
+    "pattern": "^AT\\+CEREG=(?P<n>\\d)$",
+    "actions": [
+      { "op": "set_state", "path": "cereg_mode", "value": "{n}", "cast": "int" }
+    ],
+    "final": "OK"
+  },
+  {
+    "id": "cgreg_query",
+    "pattern": "^AT\\+CGREG\\?$",
+    "response": ["+CGREG: {state.cgreg_mode},{state.cgreg_stat}"],
+    "final": "OK"
+  },
+  {
+    "id": "cgreg_set",
+    "pattern": "^AT\\+CGREG=(?P<n>\\d)$",
+    "actions": [
+      { "op": "set_state", "path": "cgreg_mode", "value": "{n}", "cast": "int" }
+    ],
+    "final": "OK"
+  },
+  {
+    "id": "cpin_query",
+    "pattern": "^AT\\+CPIN\\?$",
+    "response": ["+CPIN: {state.pin_state}"],
+    "final": "OK"
+  },
+  {
+    "id": "qurccfg_set",
+    "pattern": "^AT\\+QURCCFG=\"urcport\",\"(?P<value>[^\"]+)\"$",
+    "actions": [
+      { "op": "set_state", "path": "urc_port", "value": "{value}" }
+    ],
+    "final": "OK"
+  },
+  {
+    "id": "qurccfg_query",
+    "pattern": "^AT\\+QURCCFG=\"urcport\"$",
+    "response": ["+QURCCFG: \"urcport\",\"{state.urc_port}\""],
+    "final": "OK"
+  },
+  {
+    "id": "cops_query",
+    "pattern": "^AT\\+COPS\\?$",
+    "response": ["+COPS: {state.network_info.mode},{state.network_info.format},\"{state.network_info.operator}\",{state.network_info.act}"],
+    "final": "OK"
+  },
+  {
+    "id": "qiact_query",
+    "pattern": "^AT\\+QIACT\\?$",
+    "actions": [
+      { "op": "qiact_response" }
+    ],
+    "final": "OK"
+  },
+  {
+    "id": "qiact_set",
+    "pattern": "^AT\\+QIACT=(?P<cid>\\d+)$",
+    "actions": [
+      { "op": "pdp_auto_activate", "cid": "{cid}" }
+    ],
+    "final": "OK"
+  },
+  {
+    "id": "qideact_set",
+    "pattern": "^AT\\+QIDEACT=(?P<cid>\\d+)$",
+    "actions": [
+      { "op": "pdp_deactivate", "cid": "{cid}" }
+    ],
+    "final": "OK"
+  },
+  {
+    "id": "cpsms_query",
+    "pattern": "^AT\\+CPSMS\\?$",
+    "response": ["+CPSMS: {state.psm.mode},,,{state.psm.t3412},{state.psm.t3324}"],
+    "final": "OK"
+  },
+  {
+    "id": "cpsms_set",
+    "pattern": "^AT\\+CPSMS=(?P<mode>\\d)(?:,[^,]*,[^,]*,\"?[^\",]*\"?,\"?[^\",]*\"?)?$",
+    "actions": [
+      { "op": "set_state", "path": "psm.mode", "value": "{mode}", "cast": "int" }
+    ],
+    "final": "OK"
+  },
+  {
+        "id": "qistate_query",
+        "pattern": "^AT\\+QISTATE=(?P<query_type>\\d+),(?P<connect_id>\\d+)$",
+        "actions": [
+            {
+            "op": "qistate_query",
+            "query_type": "{query_type}",
+            "connect_id": "{connect_id}"
+            }
+        ],
+        "final": "OK"
+    },
+  {
+    "id": "qiopen",
+    "pattern": "^AT\\+QIOPEN=(?P<cid>\\d+),(?P<connid>\\d+),\"(?P<stype>[^\"]+)\",\"(?P<addr>[^\"]+)\",(?P<port>\\d+)(?:,(?P<lport>\\d+))?(?:,(?P<mode>\\d+))?$",
+    "final": "OK",
+    "actions": [
+      {
+        "op": "socket_open",
+        "connect_id": "{connid}", "context_id": "{cid}",
+        "service_type": "{stype}", "remote_ip": "{addr}", "remote_port": "{port}", "local_port": "{lport}"
+      }
+    ],
+    "urc": { "template": "+QIOPEN: {connid},{result.err}", "delay_ms": [200, 800] }
+  },
+  {
+    "id": "qiclose",
+    "pattern": "^AT\\+QICLOSE=(?P<connid>\\d+)(?:,(?P<timeout>\\d+))?$",
+    "final": "OK",
+    "actions": [
+      { "op": "socket_close", "connect_id": "{connid}" }
+    ]
+  },
+  {
+    "id": "qisend_query",
+    "pattern": "^AT\\+QISEND=(?P<connid>\\d+),0$",
+    "actions": [
+      { "op": "qisend_stats", "connect_id": "{connid}" }
+    ]
+  },
+  {
+    "id": "qisend",
+    "pattern": "^AT\\+QISEND=(?P<connid>\\d+),(?P<length>\\d+)$",
+    "actions": [
+      { "op": "qisend_prompt", "connect_id": "{connid}", "length": "{length}" }
+    ]
+  },
+  {
+    "id": "qisendex",
+    "pattern": "^AT\\+QISENDEX=(?P<connid>\\d+),(?P<hex>[0-9A-Fa-f]+)$",
+    "actions": [
+      { "op": "socket_send_hex", "connect_id": "{connid}", "data": "{hex}" }
+    ],
+    "response": ["+QISENDEX: {connid},{result.status},{result.freesize}"],
+    "final": "OK"
+  },
+  {
+    "id": "qird_query",
+    "pattern": "^AT\\+QIRD=(?P<connid>\\d+),0$",
+    "actions": [
+      { "op": "qird_stats", "connect_id": "{connid}" }
+    ]
+  },
+  {
+    "id": "qird",
+    "pattern": "^AT\\+QIRD=(?P<connid>\\d+),(?P<len>\\d+)$",
+    "actions": [
+      { "op": "socket_read", "connect_id": "{connid}", "length": "{len}" }
+    ]
+  },
+  {
+    "id": "qnvfr_nb1_cap",
+    "pattern": "^AT\\+QNVFR=\"/nv/item_files/modem/nb1/rrc/cap/nb1_cap_feature_bm\"$",
+    "response": ["+QNVFR: {state.qnvfr}"],
+    "final": "OK"
+    },
+    {
+    "id": "qicsgp_query",
+    "pattern": "^AT\\+QICSGP=(?P<cid>\\d+)$",
+    "response": [
+        "+QICSGP: {cid},\"{state.pdp_contexts.0.apn}\",\"{state.pdp_contexts.0.username}\",\"{state.pdp_contexts.0.password}\",{state.pdp_contexts.0.auth}"
+    ],
+    "final": "OK"
+    },
+    {
+    "id": "qcfg_nwscanseq_query",
+    "pattern": "^AT\\+QCFG=\"nwscanseq\"$",
+    "response": [
+        "+QCFG: \"nwscanseq\",{state.scan_sequence}"
+    ],
+    "final": "OK"
+    },
+    {
+    "id": "qcfg_iotopmode_query",
+    "pattern": "^AT\\+QCFG=\"iotopmode\"$",
+    "response": [
+        "+QCFG: \"iotopmode\",{state.iotopmode}"
+    ],
+    "final": "OK"
+    },
+    {
+        "id": "qcfg_band_query",
+        "pattern": "^AT\\+QCFG=\"band\"$",
+        "response": [
+            "+QCFG: \"band\",0x{state.band_gsm},0x{state.band_catm},0x{state.band_nbiot}"
+        ],
+        "final": "OK"
+        },
+    {
+    "id": "qcfg_servicedomain_query",
+    "pattern": "^AT\\+QCFG=\"servicedomain\"$",
+    "response": [
+        "+QCFG: \"servicedomain\",{state.servicedomain}"
+    ],
+    "final": "OK"
+    },
+    {
+    "id": "qicsgp_set",
+    "pattern": "^AT\\+QICSGP=(?P<cid>\\d+),(?P<context_type>\\d+),\"(?P<apn>[^\"]*)\",\"(?P<user>[^\"]*)\",\"(?P<password>[^\"]*)\",(?P<auth>\\d+)$",
+    "actions": [
+        {
+        "op": "set_state",
+        "path": "pdp_contexts.0.context_type",
+        "value": "{context_type}"
+        },
+        {
+        "op": "set_state",
+        "path": "pdp_contexts.0.apn",
+        "value": "{apn}"
+        },
+        {
+        "op": "set_state",
+        "path": "pdp_contexts.0.username",
+        "value": "{user}"
+        },
+        {
+        "op": "set_state",
+        "path": "pdp_contexts.0.password",
+        "value": "{password}"
+        },
+        {
+        "op": "set_state",
+        "path": "pdp_contexts.0.auth",
+        "value": "{auth}",
+        "cast": "int"
+        }
+    ],
+    "final": "OK"
+    },
+    {
+    "id": "cops_query",
+    "pattern": "^AT\\+COPS\\?$",
+    "response": [
+        "+COPS: {state.network_info.mode},{state.network_info.format},\"{state.network_info.operator}\",{state.network_info.act}"
+    ],
+    "final": "OK"
+    },
+    {
+        "id": "cops_set_format",
+        "pattern": "^AT\\+COPS=3,(?P<format>[012])$",
+        "actions": [
+            {
+            "op": "set_state",
+            "path": "network_info.format",
+            "value": "{format}",
+            "cast": "int"
+            }
+        ],
+        "final": "OK"
+    },
+    {
+        "id": "qcfg_nwscanseq_set",
+        "pattern": "^AT\\+QCFG=\"nwscanseq\",(?P<seq>[0-9]+)$",
+        "actions": [
+            {
+            "op": "set_state",
+            "path": "scan_sequence",
+            "value": "{seq}"
+            }
+        ],
+        "final": "OK"
+    },
+    {
+        "id": "qcfg_iotopmode_set",
+        "pattern": "^AT\\+QCFG=\"iotopmode\",(?P<mode>\\d+)(?:,(?P<save>\\d+))?$",
+        "actions": [
+            {
+            "op": "set_state",
+            "path": "iotopmode",
+            "value": "{mode}"
+            }
+        ],
+        "final": "OK"
+    },
+    {
+        "id": "qcfg_servicedomain_set",
+        "pattern": "^AT\\+QCFG=\"servicedomain\",(?P<domain>\\d+)$",
+        "actions": [
+            {
+            "op": "set_state",
+            "path": "servicedomain",
+            "value": "{domain}"
+            }
+        ],
+        "final": "OK"
+    },
+   
+    {
+        "id": "qcfg_band_set",
+        "pattern": "^AT\\+QCFG=\"band\",(?P<gsm>[^,]+),(?P<catm>[^,]+),(?P<nbiot>[^,]+)(?:,(?P<save>[01]))?$",
+        "actions": [
+            {
+            "op": "set_state",
+            "path": "band_gsm",
+            "value": "{gsm}"
+            },
+            {
+            "op": "set_state",
+            "path": "band_catm",
+            "value": "{catm}"
+            },
+            {
+            "op": "set_state",
+            "path": "band_nbiot",
+            "value": "{nbiot}"
+            }
+        ],
+        "final": "OK"
+    },
+    {
+        "id": "fota_qfdel",
+        "pattern": "^AT\\+QFDEL=\"EUFS:\\*\"$",
+        "final": "OK"
+    },
+    {
+        "id": "fota_qflds",
+        "pattern": "^AT\\+QFLDS=\"EUFS\"$",
+        "response": ["+QFLDS: 2396160,3055616"],
+        "final": "OK"
+    },
+    {
+        "id": "fota_qfopen",
+        "pattern": "^AT\\+QFOPEN=\"EUFS:/ufs/firmware_upgrade_file\\.bin\",0$",
+        "response": ["+QFOPEN: 20000"],
+        "final": "OK"
+    },
+    {
+        "id": "fota_qfwrite",
+        "pattern": "^AT\\+QFWRITE=(?P<handle>\\d+),(?P<length>\\d+)$",
+        "actions": [{ "op": "qfwrite", "length": "{length}" }]
+    },
+    {
+        "id": "fota_qfclose",
+        "pattern": "^AT\\+QFCLOSE=(?P<handle>\\d+)$",
+        "final": "OK"
+    },
+    {
+        "id": "fota_qscrubcfg",
+        "pattern": "^AT\\+QSCRUBCFG=\"scrubdirection\"$",
+        "response": ["+QSCRUBCFG: \"scrubdirection\",1"],
+        "final": "OK"
+    },
+    {
+        "id": "fota_qscrub",
+        "pattern": "^AT\\+QSCRUB=1$",
+        "response": ["+QSCRUB: \"START\"", "+QSCRUB: \"END\",0"],
+        "final": "OK"
+    },
+    {
+        "id": "fota_qfotadl_local_copy",
+        "pattern": "^AT\\+QFOTADL=\"EUFS:firmware_upgrade_file\\.bin\",2$",
+        "final": "OK"
+    },
+    {
+        "id": "fota_qfotadl_local_trigger",
+        "pattern": "^AT\\+QFOTADL=1$",
+        "final": "OK"
+    },
+    {
+        "id": "fota_qcfgext_apn",
+        "pattern": "^AT\\+QCFGEXT=\"fota_apn\",(?P<ip_family>[012]),\"(?P<apn>[^\"]*)\"$",
+        "final": "OK"
+    },
+    {
+        "id": "fota_qfotadl_auto_update",
+        "pattern": "^AT\\+QFOTADL=3,1$",
+        "final": "OK"
+    },
+    {
+        "id": "fota_qfotadl_wireless_start",
+        "pattern": "^AT\\+QFOTADL=\"(?P<url>[^\"]+)\"$",
+        "final": "OK"
+    },
+    {
+        "id": "fota_qfotadl_cancel",
+        "pattern": "^AT\\+QFOTADL=6$",
+        "final": "OK"
+    },
+   {
+    "id": "unknown_fallback",
+    "pattern": "^AT.*$",
+    "final": "ERROR"
+  }
+]
